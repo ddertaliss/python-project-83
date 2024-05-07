@@ -13,3 +13,5 @@ test:
 	poetry run pytest
 check:
 	poetry run self check
+build:
+	./build.sh

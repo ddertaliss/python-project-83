@@ -1,0 +1,33 @@
+body {
+    background-color: rgb(36, 34, 34);
+    color:rgb(255, 255, 255);
+}
+
+div.search {
+    background-color: rgb(74, 75, 75);
+}
+
+input.search-form {
+    background-color: rgb(255, 255, 255);
+}
+
+input.btn-clr {
+    background-color: rgb(15, 173, 160);
+}
+
+.btn-primary {
+    --bs-btn-border-color: rgb(36, 34, 34);
+}
+
+.btn {
+    --bs-btn-border-width: 0;
+}
+
+.rounded-3 {
+    border: var(--bs-border-width) var(--bs-border-style) rgb(15, 173, 160) !important;
+}
+
+div.links {
+    position: absolute;
+    left: 50%;
+}
