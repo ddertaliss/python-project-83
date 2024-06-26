@@ -15,3 +15,5 @@ check:
 	poetry run self check
 build:
 	./build.sh
+check:
+	poetry run self check
