@@ -41,17 +41,22 @@
       <th>ID</th>
       <th>Имя</th>
       <th>Последняя проверка</th>
-      <!-- <th>Код ответа</th> -->
+      <th>Код ответа</th>
     </tr>
     </thead>
     <tbody>
-      {% for line in info %}
-        <tr>
-          {% for item in line %}
-            <td>{{ item }}</td>
+        {% if info %}
+          {% for line in info %}
+            <tr>
+              <td>{{ line['id'] }}</td>
+              <td>
+                <a href="/urls/{{ line['id'] }}">{{ line['name'] }}</a>
+              </td>
+              <td>{{ line['created_at'] }}</td>
+              <td>{{ line['status_code'] }}</td>
+            </tr>
           {% endfor %}
-        </tr>
-      {% endfor %}
+        {% endif %}
     </tbody>
   </table>
 </div>

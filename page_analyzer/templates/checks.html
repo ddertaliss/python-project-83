@@ -21,19 +21,23 @@
 
   </header>
   
-  <div class="alert alert-info" role="alert">
     {% with message = get_flashed_messages() %}
       {% if message %}
         {% for msg in message %}
-          {{ msg }}
+          <div class="alert alert-primary" role="alert">
+            {{ msg }}
+          </div>
         {% endfor %}
       {% endif %}
     {% endwith %}
-  </div>
 
   <main class="flex-grow-1">
     <div class="container-lg mt-3">
-      <h1>Сайт: https://ru.hexlet.io</h1>
+      <h1>Сайт:
+        {% if table_info %}
+          {{ table_info.get('name') }}
+        {% endif %}
+      </h1>
 
     
   <div class="table-responsive">
@@ -41,15 +45,27 @@
       <tbody>
         <tr>
           <td>ID</td>
-          <td>1</td>
+          <td>
+            {% if table_info %}
+              {{ table_info.get('id') }}
+            {% endif %}
+          </td>
         </tr>
         <tr>
           <td>Имя</td>
-          <td>https://ru.hexlet.io</td>
+          <td>
+            {% if table_info %}
+              {{ table_info.get('name') }}
+            {% endif %}
+          </td>
         </tr>
         <tr>
           <td>Дата создания</td>
-          <td>2024-06-17</td>
+          <td>
+            {% if table_info %}
+              {{ table_info.get('created_at') }}
+            {% endif %}
+          </td>
         </tr>
       </tbody>
     </table>
@@ -74,15 +90,13 @@
     </thead>
       <tbody>
     
-    <tr>
-      {% for line in info %}
+      {% for line in check_info %}
         <tr>
           {% for item in line %}
             <td>{{ item }}</td>
           {% endfor %}
         </tr>
       {% endfor %}
-    </tr>
     
     </tbody>
     </table>

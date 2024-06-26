@@ -21,7 +21,27 @@
   </nav>
   
     </header>
-    
+    <!-- {% with messages = get_flashed_messages(with_categories=True) %}
+      {% if messages %}
+        {% for msg, stat in messages %}
+          {% if stat == 'error' %}
+            <div class="alert alert-danger" role="alert">
+              {{ msg }}
+            </div>
+          {% endif %}
+          {% if stat == 'success' %}
+            <div class="alert alert-success" role="alert">
+              {{ msg }}
+            </div>
+          {% endif %}
+        {% endfor %}
+      {% endif %}
+    {% endwith %} -->
+    {% with message = get_flashed_messages() %}
+      {% if message %}
+        {{ message }}
+      {% endif %}
+    {% endwith %}
 
     <main class="flex-grow-1">
       <div class="container-lg mt-3">
@@ -32,13 +52,6 @@
     <div class="search col-12 col-md-10 col-lg-8 mx-auto border rounded-3 p-5">
       <h1 class="display-3">Анализатор страниц</h1>
       <p class="lead">Бесплатно проверяйте сайты на SEO-пригодность</p>
-      {% with messages = get_flashed_messages() %}
-        {% if messages %}
-          {% for msg in messages %}
-            {{msg}}
-          {% endfor %}
-        {% endif %}
-      {% endwith %}
       <form action="/urls " method="post" class="d-flex justify-content-center">
       <input type="text" name="url" placeholder="https://www.example.com" value="" class="search-form form-control form-control-lg" required>
       <input type="submit" class="btn-clr btn btn-primary btn-lg ms-3 px-5 text-uppercase mx-3" value="Проверить">

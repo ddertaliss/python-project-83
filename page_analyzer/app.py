@@ -2,7 +2,8 @@ import os
 import psycopg2
 import requests
 from dotenv import load_dotenv
-from flask import Flask, render_template, request, flash, redirect, url_for 
+from flask import Flask, render_template, request, flash, redirect, url_for
+from bs4 import BeautifulSoup
 from urllib.parse import urlparse
 from validators.url import url
 from datetime import datetime
@@ -15,6 +16,7 @@ app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 conn = psycopg2.connect(DATABASE_URL)
 cur = conn.cursor()
 
+
 @app.route('/', methods=['GET'])
 def start():
     return render_template('home.html')
@@ -24,16 +26,45 @@ def start():
 def show():
     flag = False
     if request.method == 'GET':
-        cur.execute('SELECT * FROM urls')
-        info = cur.fetchall()
+        cur.execute(
+            'SELECT id, name, DATE(created_at) FROM urls ORDER BY id DESC'
+            )
+        urls_info = cur.fetchall()
+        cur.execute(
+            'SELECT url_id, status_code FROM url_checks WHERE id IN (SELECT MAX(id) FROM url_checks GROUP BY url_id)'  # noqa: E501
+            )
+        urls_check = cur.fetchall()
+        info = []
+
+        for item in urls_info:
+            info.append(
+                {
+                    'id': item[0],
+                    'name': item[1],
+                    'created_at': item[2],
+                    'status_code': None
+                    }
+                )
+
+        print(info)
+
+        for indx, item in enumerate(info):
+            id = item['id']
+            print(id)
+            for i in urls_check:
+                if i[0] == id:
+                    info[indx]['status_code'] = i[1]
+        print(info)
         return render_template('show.html', info=info)
+
     if request.method == 'POST':
         site_url = request.form.get('url')
         if url:
             print('юрл есть')
             if len(site_url) > 255:
                 print('длинный сайт')
-                flash('too long', 'err')
+                flash('Некорректый URL', 'error')
+                return render_template('home.html')
             else:
                 print('длина нормальная')
                 print('переходим в иф')
@@ -44,8 +75,9 @@ def show():
                     flag = True
                     print('флаг изменен на true')
                 else:
-                    print('ошибка в трае')
-                    flash('unable to load site')
+                    print('сайт не работает')
+                    flash('Некорректый URL')
+                    return render_template('home.html')
         if flag:
             print('флаг true, продолжаем')
             site = urlparse(site_url)
@@ -60,10 +92,14 @@ def show():
             print('GOOOFY AHH DUBLICATE:', dublicates)
             if len(dublicates) < 1:
                 print('записи еще нет, добавляем в таблицу')
-                cur.execute("INSERT INTO urls (name, created_at) VALUES (%s, %s)", (full_name, datetime.now()))
+                flash('Страница успешно добавлена')
+                cur.execute(
+                    "INSERT INTO urls (name, created_at) VALUES (%s, %s)",
+                    (full_name, datetime.now())
+                    )
                 conn.commit()
             else:  # потом удалить
-                flash('Запись уже добавлена', 'ok')
+                flash('Страница уже существует')
                 print('обнаржены дубликаты, запись не добавлена')  # удалить
             cur.execute('SELECT * FROM urls ORDER BY created_at')
             info = cur.fetchall()
@@ -75,17 +111,60 @@ def show():
             print('ID:', id)
             return redirect(url_for('.show_id', id=id))
 
+
 @app.route('/urls/<int:id>')
 def show_id(id):
-    cur.execute("SELECT * FROM urls WHERE id = %s", (id,))
-    info = cur.fetchall()
-    return render_template('checks.html', info=info, id=id) 
+    cur.execute(
+        'SELECT id, name, DATE(created_at) FROM urls WHERE id = %s', (id,)
+        )
+    temp_info = cur.fetchall()
+    print('table info', temp_info)
+    table_info = {
+        'id': temp_info[0][0],
+        'name': temp_info[0][1],
+        'created_at': temp_info[0][2]
+    }
+    print(table_info)
+    cur.execute('SELECT id, status_code, h1, title, description, DATE(created_at) FROM url_checks WHERE url_id = %s ORDER BY id DESC', (id,))  # noqa: E501
+    check_info = cur.fetchall()
+    return render_template(
+        'checks.html',
+        table_info=table_info,
+        check_info=check_info,
+        id=id
+        )
+
 
 @app.post('/urls/<id>/checks')
 def checks(id):
-    cur.execute("INSERT INTO url_checks (url_id) VALUES (%s)", (id,))
-    conn.commit()
-    cur.execute('SELECT * FROM url_checks WHERE url_id = %s', (id,))
-    info = cur.fetchall()
-    return render_template('checks.html', info=info, id=id)
-    
+    cur.execute("SELECT name FROM urls WHERE id = %s", (id,))
+    site_name = (cur.fetchall())[0][0]
+    req = requests.get(site_name)
+    response = req.status_code
+    if response != 200:
+        flash('Произошла ошибка при проверке', 'error')
+    else:
+        h1_text = ''
+        title_text = ''
+        meta_text = ''
+        html = req.text
+        soup = BeautifulSoup(html, 'html.parser')
+        h1 = soup.h1
+        print('h1:', h1)
+        if h1 and h1.contents:
+            h1_text = (h1.contents)[0]
+        title = soup.title
+        print('title:', title)
+        if title and title.contents:
+            title_text = (title.contents)[0]
+        meta = soup(name='meta', attrs={'name': 'description'})
+        print('meta:', meta)
+        if meta and meta[0].get('content'):
+            meta_text = meta[0].get('content')
+        cur.execute(
+            "INSERT INTO url_checks (url_id, status_code, h1, title, description, created_at) VALUES (%s, %s, %s, %s, %s, %s)",  # noqa E:501
+            (id, int(response), str(h1_text), str(title_text), str(meta_text), datetime.now(),)  # noqa E:501
+            )
+        conn.commit()
+        flash('Страница успешно проверена')
+    return redirect(url_for('.show_id', id=id))
