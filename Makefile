@@ -10,10 +10,12 @@ lint:
 l:
 	poetry run flake8
 test:
-	poetry run pytest
+	poetry run pytest --cov=page_analyzer
 build:
 	./build.sh
-check:
+selfcheck:
 	poetry check
 test-coverage:
-	poetry run pytest
+	poetry run pytest --cov=page_analyzer --cov-report xml
+check:
+	selfcheck test lint
