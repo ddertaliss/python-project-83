@@ -11,9 +11,7 @@ l:
 	poetry run flake8
 test:
 	poetry run pytest
-check:
-	poetry run self check
 build:
 	./build.sh
 check:
-	poetry run self check
+	poetry check
