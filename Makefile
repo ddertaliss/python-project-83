@@ -15,3 +15,5 @@ build:
 	./build.sh
 check:
 	poetry check
+test-coverage:
+	poetry run pytest
