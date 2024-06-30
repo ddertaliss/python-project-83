@@ -13,9 +13,6 @@ load_dotenv()
 DATABASE_URL = os.getenv('DATABASE_URL')
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 
-conn = psycopg2.connect(DATABASE_URL)
-cur = conn.cursor()
-
 
 @app.route('/', methods=['GET'])
 def start():
@@ -24,6 +21,8 @@ def start():
 
 @app.route('/urls', methods=['POST', 'GET'])
 def show():
+    conn = psycopg2.connect(DATABASE_URL)
+    cur = conn.cursor()
     flag = False
     if request.method == 'GET':
         cur.execute(
@@ -55,9 +54,12 @@ def show():
                 if i[0] == id:
                     info[indx]['status_code'] = i[1]
         print(info)
+        cur.close()
+        conn.close()
         return render_template('show.html', info=info)
 
     if request.method == 'POST':
+        cur = conn.cursor()
         site_url = request.form.get('url')
         if url:
             print('юрл есть')
@@ -77,6 +79,8 @@ def show():
                 else:
                     print('сайт не работает')
                     flash('Некорректый URL')
+                    cur.close()
+                    conn.close()
                     return render_template('home.html')
         if flag:
             print('флаг true, продолжаем')
@@ -109,11 +113,15 @@ def show():
             id = cur.fetchall()
             id = id[0][0]
             print('ID:', id)
+            cur.close()
+            conn.close()
             return redirect(url_for('.show_id', id=id))
 
 
 @app.route('/urls/<int:id>')
 def show_id(id):
+    conn = psycopg2.connect(DATABASE_URL)
+    cur = conn.cursor()
     cur.execute(
         'SELECT id, name, DATE(created_at) FROM urls WHERE id = %s', (id,)
         )
@@ -127,6 +135,8 @@ def show_id(id):
     print(table_info)
     cur.execute('SELECT id, status_code, h1, title, description, DATE(created_at) FROM url_checks WHERE url_id = %s ORDER BY id DESC', (id,))  # noqa: E501
     check_info = cur.fetchall()
+    cur.close()
+    conn.close()
     return render_template(
         'checks.html',
         table_info=table_info,
@@ -137,6 +147,8 @@ def show_id(id):
 
 @app.post('/urls/<id>/checks')
 def checks(id):
+    conn = psycopg2.connect(DATABASE_URL)
+    cur = conn.cursor()
     cur.execute("SELECT name FROM urls WHERE id = %s", (id,))
     site_name = (cur.fetchall())[0][0]
     req = requests.get(site_name)
@@ -167,4 +179,6 @@ def checks(id):
             )
         conn.commit()
         flash('Страница успешно проверена')
+    cur.close()
+    conn.close()
     return redirect(url_for('.show_id', id=id))
