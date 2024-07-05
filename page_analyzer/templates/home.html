@@ -21,25 +21,14 @@
   </nav>
   
     </header>
-    <!-- {% with messages = get_flashed_messages(with_categories=True) %}
-      {% if messages %}
-        {% for msg, stat in messages %}
-          {% if stat == 'error' %}
-            <div class="alert alert-danger" role="alert">
-              {{ msg }}
-            </div>
-          {% endif %}
-          {% if stat == 'success' %}
-            <div class="alert alert-success" role="alert">
-              {{ msg }}
-            </div>
-          {% endif %}
-        {% endfor %}
-      {% endif %}
-    {% endwith %} -->
+
     {% with message = get_flashed_messages() %}
       {% if message %}
-        {{ message }}
+        {% for msg in message %}
+          <div class="alert alert-primary" role="alert">
+            {{ msg }}
+          </div>
+        {% endfor %}
       {% endif %}
     {% endwith %}
 

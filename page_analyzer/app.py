@@ -65,8 +65,8 @@ def show():
             print('юрл есть')
             if len(site_url) > 255:
                 print('длинный сайт')
-                flash('Некорректый URL', 'error')
-                return render_template('home.html')
+                flash('Некорректый URL')
+                return render_template('home.html'), 422
             else:
                 print('длина нормальная')
                 print('переходим в иф')
@@ -81,7 +81,7 @@ def show():
                     flash('Некорректый URL')
                     cur.close()
                     conn.close()
-                    return render_template('home.html')
+                    return render_template('home.html'), 422
         if flag:
             print('флаг true, продолжаем')
             site = urlparse(site_url)
