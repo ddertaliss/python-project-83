@@ -65,7 +65,7 @@ def show():
             print('юрл есть')
             if len(site_url) > 255:
                 print('длинный сайт')
-                flash('Некорректый URL')
+                flash('Некорректный URL')
                 return render_template('home.html'), 422
             else:
                 print('длина нормальная')
@@ -78,7 +78,7 @@ def show():
                     print('флаг изменен на true')
                 else:
                     print('сайт не работает')
-                    flash('Некорректый URL')
+                    flash('Некорректный URL')
                     cur.close()
                     conn.close()
                     return render_template('home.html'), 422
