@@ -19,6 +19,7 @@ psycopg2-binary = "^2.9.9"
 validators = "^0.28.3"
 requests = "^2.32.3"
 beautifulsoup4 = "^4.12.3"
+pytest-cov = "^5.0.0"
 
 [tool.poetry.scripts]
 app = "page_analyzer.app:start"

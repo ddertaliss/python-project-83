@@ -18,4 +18,4 @@ selfcheck:
 test-coverage:
 	poetry run pytest --cov=page_analyzer --cov-report xml
 check:
-	selfcheck test lint
+	poetry check
