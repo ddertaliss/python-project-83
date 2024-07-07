@@ -27,11 +27,12 @@ def show():
     if request.method == 'GET':
         cur.execute(
             'SELECT id, name, DATE(created_at) FROM urls ORDER BY id DESC'
-            )
+        )
         urls_info = cur.fetchall()
         cur.execute(
             'SELECT url_id, status_code FROM url_checks WHERE id IN (SELECT MAX(id) FROM url_checks GROUP BY url_id)'  # noqa: E501
-            )
+        
+        )
         urls_check = cur.fetchall()
         info = []
 
@@ -42,8 +43,8 @@ def show():
                     'name': item[1],
                     'created_at': item[2],
                     'status_code': None
-                    }
-                )
+                }
+            )
 
         print(info)
 
@@ -100,7 +101,7 @@ def show():
                 cur.execute(
                     "INSERT INTO urls (name, created_at) VALUES (%s, %s)",
                     (full_name, datetime.now())
-                    )
+                )
                 conn.commit()
             else:  # потом удалить
                 flash('Страница уже существует')
@@ -124,7 +125,7 @@ def show_id(id):
     cur = conn.cursor()
     cur.execute(
         'SELECT id, name, DATE(created_at) FROM urls WHERE id = %s', (id,)
-        )
+    )
     temp_info = cur.fetchall()
     print('table info', temp_info)
     table_info = {
@@ -142,7 +143,7 @@ def show_id(id):
         table_info=table_info,
         check_info=check_info,
         id=id
-        )
+    )
 
 
 @app.post('/urls/<id>/checks')
@@ -176,7 +177,7 @@ def checks(id):
         cur.execute(
             "INSERT INTO url_checks (url_id, status_code, h1, title, description, created_at) VALUES (%s, %s, %s, %s, %s, %s)",  # noqa E:501
             (id, int(response), str(h1_text), str(title_text), str(meta_text), datetime.now(),)  # noqa E:501
-            )
+        )
         conn.commit()
         flash('Страница успешно проверена')
     cur.close()
