@@ -31,7 +31,6 @@ def show():
         urls_info = cur.fetchall()
         cur.execute(
             'SELECT url_id, status_code FROM url_checks WHERE id IN (SELECT MAX(id) FROM url_checks GROUP BY url_id)'  # noqa: E501
-        
         )
         urls_check = cur.fetchall()
         info = []
