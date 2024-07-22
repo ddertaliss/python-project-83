@@ -5,7 +5,7 @@ from flask import Flask, render_template, request, flash, redirect, url_for
 from urllib.parse import urlparse
 from validators.url import url
 from datetime import datetime
-import db
+from page_analyzer import db
 
 app = Flask(__name__)
 load_dotenv()
